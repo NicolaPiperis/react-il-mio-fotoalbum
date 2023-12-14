@@ -16,6 +16,10 @@ model Photo {
   description String     @db.Text
   image       String     @db.Text
   published   Boolean    @default(true)
+  // una foto ha un solo user
+  User        User?      @relation(fields: [userId], references: [id])
+  userId      Int?
+  // una foto può avere più categorie
   categories  Category[]
   createdAt   DateTime   @default(now())
   updatedAt   DateTime   @updatedAt
@@ -24,7 +28,26 @@ model Photo {
 model Category {
   id        Int      @id @default(autoincrement())
   name      String   @db.VarChar(100)
+  // una categoria può avere più foto
   photos    Photo[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  name      String   @db.VarChar(64)
+  email     String   @unique
+  password  String
+  // uno user ha più foto
+  photos    Photo[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Message {
+  id        Int      @id @default(autoincrement())
+  content   String   @db.Text
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
