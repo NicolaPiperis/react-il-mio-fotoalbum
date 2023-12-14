@@ -32,14 +32,36 @@ async function show (req, res) {
         }
     })
     if(!data) {
-        res.send("Photo non trovata")
+        res.send("Photo non trovata, aggiorna il server")
     }
     
     return res.json(data);
 };
 
 async function update(req, res) {
+    const idParams = req.params.id;
+    const idParamsInt = parseInt(idParams);
+    const dataInComing = req.body;
 
+    const photo = await prisma.photo.findUnique({
+        where: {
+            id: idParamsInt
+        }
+    })
+    if(!photo) {
+        res.send("Photo non trovata, aggiorna il server")
+    }
+
+    const updatePhoto = await prisma.photo.update({
+        data: {
+            ...dataInComing
+        },
+        where: {
+            id: idParamsInt
+        }
+    });
+
+    return res.json(updatePhoto);
 }; 
 
 async function destroy (req, res) { 
