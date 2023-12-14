@@ -9,14 +9,22 @@ async function store (req, res) {
             title: photoData.title,
             description: photoData.description,
             image: photoData.image,
-            published: photoData.published
+            published: photoData.published,
+            categories: {
+                connect: photoData.categories.map(
+                    idCategory => ({id : idCategory})
+                )
+            }
+        },
+        include: {
+            categories: true
         }
     })
 
     return res.json(newPhoto);
 };
 
-// Visualizza le colonne photo
+// Visualizza le colonne photo, con filtro se necessarrio
 async function index (req, res) {
     const queryfilters = {};
     const {title, published} = req.query;
@@ -32,7 +40,14 @@ async function index (req, res) {
         }
     }
 
-    const data = await prisma.photo.findMany({where: queryfilters});
+    const data = await prisma.photo.findMany({
+        where: 
+        queryfilters,
+        include: {
+            categories: true
+        }
+        
+    });
 
     return res.json(data);
 
@@ -44,6 +59,9 @@ async function show (req, res) {
     const data = await prisma.photo.findUnique({
         where: {
             id: parseInt(idParams)
+        },
+        include: {
+            categories: true
         }
     })
     if(!data) {
@@ -62,10 +80,18 @@ async function update(req, res) {
 
     const updatePhoto = await prisma.photo.update({
         data: {
-            ...dataInComing
+            ...dataInComing,
+            categories: {
+                connect: dataInComing.categories.map(
+                    idCategory => ({id : idCategory})
+                )
+            }
         },
         where: {
             id: idParamsInt
+        },
+        include: {
+            categories: true    
         }
     });
 
@@ -80,6 +106,9 @@ async function destroy (req, res) {
     const deletedData = await prisma.photo.delete({
         where: {
             id: idParamsInt
+        },
+        include: {
+            categories: true
         }
     })
 
