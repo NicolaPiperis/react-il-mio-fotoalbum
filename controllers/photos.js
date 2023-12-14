@@ -38,19 +38,11 @@ async function show (req, res) {
     return res.json(data);
 };
 
+// aggiorna colonna photo, attraverso parametro(id)
 async function update(req, res) {
     const idParams = req.params.id;
     const idParamsInt = parseInt(idParams);
     const dataInComing = req.body;
-
-    const photo = await prisma.photo.findUnique({
-        where: {
-            id: idParamsInt
-        }
-    })
-    if(!photo) {
-        res.send("Photo non trovata, aggiorna il server")
-    }
 
     const updatePhoto = await prisma.photo.update({
         data: {
@@ -64,7 +56,18 @@ async function update(req, res) {
     return res.json(updatePhoto);
 }; 
 
+// aggiorna colonna photo, attraverso parametro(id)
 async function destroy (req, res) { 
+    const idParams = req.params.id;
+    const idParamsInt = parseInt(idParams);
+
+    const deletedData = await prisma.photo.delete({
+        where: {
+            id: idParamsInt
+        }
+    })
+
+    return res.json(`La photo con id: ${deletedData.id} e intitolata "${deletedData.title}" è stata eliminata correttamente`);
 }
 
 module.exports = {
