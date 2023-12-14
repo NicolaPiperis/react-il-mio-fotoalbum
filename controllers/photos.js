@@ -1,28 +1,54 @@
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
+// libreria per validazione
+const Joi = require('@hapi/joi');
+
+// Funzione di validazione con Joi
+const validatePhotoData = (data) => {
+    const schema = Joi.object({
+      title: Joi.string().required(),
+      description: Joi.string().required(),
+      image: Joi.string().required(),
+      published: Joi.boolean().required(),
+      categories: Joi.array().items(Joi.number().integer()).required(),
+    });
+  
+    return schema.validate(data);
+  };
 
 // Crea una colonna foto
-async function store (req, res) {
-    const photoData = req.body;
-    const newPhoto = await prisma.photo.create({
-        data:{
-            title: photoData.title,
-            description: photoData.description,
-            image: photoData.image,
-            published: photoData.published,
-            categories: {
-                connect: photoData.categories.map(
-                    idCategory => ({id : idCategory})
-                )
-            }
+async function store(req, res) {
+    try {
+      // Validazione dei dati della foto
+      const { error } = validatePhotoData(req.body);
+      if (error) {
+        return res.status(400).json({ error: error.details[0].message });
+      }
+  
+      const photoData = req.body;
+      const newPhoto = await prisma.photo.create({
+        data: {
+          title: photoData.title,
+          description: photoData.description,
+          image: photoData.image,
+          published: photoData.published,
+          categories: {
+            connect: photoData.categories.map(
+              idCategory => ({ id: idCategory })
+            )
+          }
         },
         include: {
-            categories: true
+          categories: true
         }
-    })
-
-    return res.json(newPhoto);
-};
+      });
+  
+      return res.json(newPhoto);
+    } catch (error) {
+      console.error("Errore durante la creazione della foto:", error);
+      return res.status(500).json({ error: "Errore durante l'elaborazione della richiesta" });
+    }
+  }
 
 // Visualizza le colonne photo, con filtro se necessarrio
 async function index (req, res) {
@@ -74,28 +100,41 @@ async function show (req, res) {
 
 // aggiorna colonna photo, attraverso parametro(id)
 async function update(req, res) {
-    const idParams = req.params.id;
-    const idParamsInt = parseInt(idParams);
-    const dataInComing = req.body;
-
-    const updatePhoto = await prisma.photo.update({
-        data: {
-            ...dataInComing,
-            categories: {
-                connect: dataInComing.categories.map(
-                    idCategory => ({id : idCategory})
-                )
-            }
-        },
-        where: {
-            id: idParamsInt
-        },
-        include: {
-            categories: true    
+    
+    try {
+        // Validazione dei dati della foto
+        const { error } = validatePhotoData(req.body);
+        if (error) {
+            return res.status(400).json({ error: error.details[0].message });
         }
-    });
-
-    return res.json(updatePhoto);
+        
+        const idParams = req.params.id;
+        const idParamsInt = parseInt(idParams);
+        const dataInComing = req.body;
+    
+        const updatePhoto = await prisma.photo.update({
+            data: {
+                ...dataInComing,
+                categories: {
+                    connect: dataInComing.categories.map(
+                        idCategory => ({id : idCategory})
+                    )
+                }
+            },
+            where: {
+                id: idParamsInt
+            },
+            include: {
+                categories: true    
+            }
+        });
+    
+        return res.json(updatePhoto);
+        
+    } catch (error) {
+        console.error("Errore durante la creazione della foto:", error);
+        return res.status(500).json({ error: "Errore durante l'elaborazione della richiesta" });
+    }
 }; 
 
 // aggiorna colonna photo, attraverso parametro(id)
