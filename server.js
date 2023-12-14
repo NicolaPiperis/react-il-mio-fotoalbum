@@ -5,11 +5,16 @@ const port = process.env.PORT || 3000; // Utilizza la porta specificata nell'amb
 const app = express();
 const photosRouter = require('./routers/photos');
 
-
-app.use((req,  res) => {
-    res.send("Hello world!")
-    console.log("Server.js risponde correttamente");
+// Middleware per consentire a qualsiasi dominio di accedere alle API (CORS)
+app.use((req, res, next) => {
+    res.header('Access-Control-Allow-Origin', '*'); // Consenti a qualsiasi dominio
+    res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE'); // Metodi consentiti
+    res.header('Access-Control-Allow-Headers', 'Origin, X-Requested-With, Content-Type, Accept'); // Intestazioni consentite
+    next();
 });
+
+// Middleware per il parsing del body
+app.use(express.json());
 
 // Definizione rotte
 app.use('/photos', photosRouter);

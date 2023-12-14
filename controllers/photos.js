@@ -2,7 +2,17 @@ const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
 async function store (req, res) {
+    const photoData = req.body;
+    const newPhoto = await prisma.photo.create({
+        data:{
+            title: photoData.title,
+            description: photoData.description,
+            image: photoData.image,
+            published: photoData.published
+        }
+    })
 
+    return res.json(newPhoto);
 };
 
 async function index (req, res) {
