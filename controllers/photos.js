@@ -16,7 +16,9 @@ async function store (req, res) {
 };
 
 async function index (req, res) {
-
+    const data = await prisma.photo.findMany();
+    
+    res.json(data);
 };
 
 async function show (req, res) {
