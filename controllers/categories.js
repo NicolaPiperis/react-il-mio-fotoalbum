@@ -1,8 +1,27 @@
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 
+// libreria per validazione
+const Joi = require('@hapi/joi');
+
+// Funzione di validazione con Joi
+const validatePhotoData = (data) => {
+    const schema = Joi.object({
+      name: Joi.string().required()
+    });
+  
+    return schema.validate(data);
+  };
+
 // Crea una colonna foto
 async function store (req, res) {
+    try {
+        // Validazione dei dati della foto
+        const { error } = validatePhotoData(req.body);
+        if (error) {
+          return res.status(400).json({ error: error.details[0].message });
+        }
+
     const categoryData = req.body;
     const newCategory = await prisma.category.create({
         data:{
@@ -11,6 +30,10 @@ async function store (req, res) {
     })
 
     return res.json(newCategory);
+    }catch(error){
+        console.error("Errore durante la creazione della foto:", error);
+        return res.status(500).json({ error: "Errore durante l'elaborazione della richiesta" });
+    }
 };
 
 // Visualizza le colonne photo, con filtro se necessarrio
@@ -51,6 +74,12 @@ async function show (req, res) {
 
 // aggiorna colonna photo, attraverso parametro(id)
 async function update(req, res) {
+    // Validazione dei dati della foto
+    const { error } = validatePhotoData(req.body);
+    if (error) {
+      return res.status(400).json({ error: error.details[0].message });
+    }
+
     const idParams = req.params.id;
     const idParamsInt = parseInt(idParams);
     const dataInComing = req.body;
