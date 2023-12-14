@@ -16,11 +16,26 @@ async function store (req, res) {
     return res.json(newPhoto);
 };
 
-// Visualizza le colonne foto
+// Visualizza le colonne photo
 async function index (req, res) {
-    const data = await prisma.photo.findMany();
+    const queryfilters = {};
+    const {title, published} = req.query;
+
+    if(title) {
+        queryfilters.title = {
+            contains: title
+        }
+    }
+    if(published) {
+        queryfilters.published = {
+            equals: published === "true"
+        }
+    }
+
+    const data = await prisma.photo.findMany({where: queryfilters});
 
     return res.json(data);
+
 };
 
 // Visualizza la colonna foto desiderata, attraverso un parametro(id)
@@ -37,6 +52,7 @@ async function show (req, res) {
     
     return res.json(data);
 };
+
 
 // aggiorna colonna photo, attraverso parametro(id)
 async function update(req, res) {

@@ -15,8 +15,6 @@ router.get('/', photosController.index);
 // Ottieni una foto
 router.get('/:id', photosController.show);
 
-// router.get('/', photosController.showByFilter);
-
 // PUT / photo/:id
 // Modifica una foto
 router.put('/:id', /*authHandler,*/photosController.update);
