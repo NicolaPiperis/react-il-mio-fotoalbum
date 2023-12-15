@@ -7,6 +7,7 @@ const app = express();
 const photosRouter = require('./routers/photos');
 const categoriesRouter = require('./routers/categories');
 const messagesRouter = require('./routers/messages');
+const userRouter = require('./routers/auth');
 
 // Middleware per consentire a qualsiasi dominio di accedere alle API (CORS)
 app.use((req, res, next) => {
@@ -23,6 +24,7 @@ app.use(express.json());
 app.use('/photos', photosRouter);
 app.use('/categories', categoriesRouter);
 app.use('/messages', messagesRouter);
+app.use('/', userRouter);
 
 // Avvia il server
 app.listen(port, () => {
