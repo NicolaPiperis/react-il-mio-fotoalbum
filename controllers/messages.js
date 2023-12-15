@@ -1,7 +1,7 @@
 const { PrismaClient } = require("@prisma/client");
 const prisma = new PrismaClient();
 // libreria per validazione
-const Joi = require('@hapi/joi');
+// const Joi = require('@hapi/joi');
 
 // Funzione di validazione con Joi
 // const validatePhotoData = (data) => {
@@ -21,8 +21,10 @@ async function store(req, res) {
     //   }
   
       const messageData = req.body;
+      
       const newMessage = await prisma.message.create({
         data: {
+          email: messageData.email,
           content: messageData.content
         }
       });
@@ -33,67 +35,57 @@ async function store(req, res) {
 
 // Visualizza le colonne photo, con filtro se necessarrio
 async function index (req, res) {
-    // const queryfilters = {};
-    // const {title, published} = req.query;
+    const queryfilters = {};
+    const {content, email} = req.query;
 
-    // if(title) {
-    //     queryfilters.title = {
-    //         contains: title
-    //     }
-    // }
-    // if(published) {
-    //     queryfilters.published = {
-    //         equals: published === "true"
-    //     }
-    // }
+    if(content) {
+        queryfilters.content = {
+            contains: content
+        }
+    }
+    if(email) {
+      queryfilters.email = {
+          contains: email
+      }
+  }
 
-    // const data = await prisma.photo.findMany({
-    //     where: 
-    //     queryfilters,
-    //     include: {
-    //         categories: true
-    //     }
-        
-    // });
+    const data = await prisma.message.findMany({
+      where:
+      queryfilters
+    })
 
-    // return res.json(data);
+    return res.json(data);
 
 };
 
 // Visualizza la colonna foto desiderata, attraverso un parametro(id)
 async function show (req, res) {
-    // const idParams = req.params.id;
-    // const data = await prisma.photo.findUnique({
-    //     where: {
-    //         id: parseInt(idParams)
-    //     },
-    //     include: {
-    //         categories: true
-    //     }
-    // })
-    // if(!data) {
-    //     res.send("Photo non trovata, aggiorna il server")
-    // }
+    const idParams = req.params.id;
+    const data = await prisma.message.findUnique({
+        where: {
+            id: parseInt(idParams)
+        }
+    })
+    if(!data) {
+        res.send("Messaggio non trovato, aggiorna il server")
+    }
     
-    // return res.json(data);
+    return res.json(data);
 };
 
 
 // aggiorna colonna photo, attraverso parametro(id)
 async function destroy (req, res) { 
-    // const idParams = req.params.id;
-    // const idParamsInt = parseInt(idParams);
+    const idParams = req.params.id;
+    const idParamsInt = parseInt(idParams);
 
-    // const deletedData = await prisma.photo.delete({
-    //     where: {
-    //         id: idParamsInt
-    //     },
-    //     include: {
-    //         categories: true
-    //     }
-    // })
+    const deletedData = await prisma.message.delete({
+        where: {
+            id: idParamsInt
+        }
+    })
 
-    // return res.json(`La photo con id: ${deletedData.id} e intitolata "${deletedData.title}" è stata eliminata correttamente`);
+    return res.json(`Il messaggio con id: ${deletedData.id} è stato eliminato correttamente`);
 }
 
 module.exports = {
